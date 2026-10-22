@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Запись урока — демонстрация</title>
-  <link rel="stylesheet" href="static/base.css?v=1792695005">
+  <link rel="stylesheet" href="static/base.css?v=1792697979">
   <style>
     body { background: #fff; }
     .wrap { max-width: 900px; margin: 0 auto; }
@@ -22,13 +22,15 @@
     .err h1 { font-size: 24px; margin-bottom: 10px; }
     .cc { margin-top: 14px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
     .cc[aria-pressed="true"] { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
-    video::cue { background: rgba(0, 0, 0, .72); color: #fff; font-size: 1.05em; line-height: 1.35; }
+    /* субтитры без подложки: цветной текст с тёмной обводкой — читается и на светлом, и на тёмном кадре */
+    video::cue { background: transparent; color: #ffd45c; font-weight: 700; font-size: 1.1em; line-height: 1.35;
+      text-shadow: 0 0 2px #2a1f45, 0 0 2px #2a1f45, 1px 1px 1px #2a1f45, -1px -1px 1px #2a1f45, 1px -1px 1px #2a1f45, -1px 1px 1px #2a1f45; }
     .no-file { aspect-ratio: 16/9; display: grid; place-items: center; color: #aab4c4; padding: 20px; text-align: center; }
   </style>
-  <link rel="stylesheet" href="static/demo/demo.css?v=1792695005">
+  <link rel="stylesheet" href="static/demo/demo.css?v=1792697979">
   <script>window.KZ_DEMO = {"recId": 6};</script>
-  <script src="static/demo/demo_data.js?v=1792695005"></script>
-  <script src="static/demo/demo.js?v=1792695005"></script>
+  <script src="static/demo/demo_data.js?v=1792697979"></script>
+  <script src="static/demo/demo.js?v=1792697979"></script>
 </head>
 <body>
   <div class="wrap" id="root"><div class="err"><span class="spinner" aria-label="Загрузка"></span></div></div>
