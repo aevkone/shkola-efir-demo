@@ -201,3 +201,21 @@ details summary { cursor: pointer; display: inline-block; }
 .swatch:hover { transform: translateY(-1px); }
 .hint-box { border-left: 3px solid var(--gold); }
 .topbar b { text-wrap: balance; line-height: 1.25; }
+
+/* узор школы */
+html[data-decor] .side, html[data-decor] .topbar {
+  background-image: var(--decor-mark), var(--decor-tile);
+  background-repeat: no-repeat, repeat; background-size: 360px, var(--decor-tile-size);
+  background-position: 50% calc(100% + 150px), 0 0;
+}
+html[data-decor] .topbar { background-size: 0, var(--decor-tile-size); }
+html[data-decor="astro"] .main { background: var(--decor-mark) no-repeat right -150px top -150px / 420px; }
+.decor-pick { display: flex; flex-wrap: wrap; gap: 8px; }
+.decor-opt {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px; border-radius: 12px;
+  border: 1px solid var(--line); background: #fff; color: var(--text); font-weight: 600; cursor: pointer;
+  transition: border-color .15s ease-out, background-color .15s ease-out;
+}
+.decor-opt:hover { border-color: var(--blue); }
+.decor-opt.on { border-color: var(--blue); background: var(--blue-soft); box-shadow: inset 0 0 0 1px var(--blue); }
+.decor-ico { width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: var(--navy); color: var(--gold); font-size: 14px; }

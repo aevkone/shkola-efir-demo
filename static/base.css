@@ -171,3 +171,8 @@ img { outline: 1px solid rgba(0, 0, 0, .08); outline-offset: -1px; }
   .modal-back, .modal, .toast { animation: none; }
   .btn:active:not(:disabled) { transform: none; }
 }
+
+/* ---------- тематический узор школы (data-decor на <html>) ---------- */
+html[data-decor="astro"] { --decor-tile: url("decor/astro-stars.svg"); --decor-tile-size: 320px; --decor-mark: url("decor/astro-wheel.svg"); }
+html[data-decor="design"] { --decor-tile: url("decor/design.svg"); --decor-tile-size: 240px; --decor-mark: none; }
+html[data-decor="auto"] { --decor-tile: url("decor/auto.svg"); --decor-tile-size: 280px; --decor-mark: none; }

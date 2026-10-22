@@ -23,6 +23,10 @@
     if (accent) { r.setProperty("--gold", accent); r.setProperty("--gold-soft", mix(accent, [255, 255, 255], 0.82)); }
     if (P.me) P.me.theme_color = savedTheme;
   }
+  let decor = P.me ? (P.me.decor || "") : "";
+  try { const d = localStorage.getItem("kz_demo_decor"); if (d !== null) decor = d; } catch (_) { /* приватный режим */ }
+  if (decor) document.documentElement.dataset.decor = decor;
+  if (P.me) P.me.decor = decor;
   const nid = () => ++seq;
 
   // плашка «Демонстрация»
@@ -156,7 +160,7 @@
     if (pth === "/staff" && method === "POST") { const s = { id: nid(), label: body.label, role: body.role, role_label: body.role === "host" ? "Ведущая" : "Модератор", status: "waiting", status_label: "Ждём вход", ...link(tok("adm_")) }; P.staff.items.push(s); return ok(s); }
     if ((m = pth.match(/^\/staff\/(\d+)$/))) { const s = P.staff.items.find((x) => x.id === Number(m[1])); if (body.disabled !== undefined) Object.assign(s, body.disabled ? { status: "disabled", status_label: "Отключён" } : { status: "active", status_label: "Активен" }); return ok(s); }
     if (pth === "/broadcast") return ok({ total: body.who === "absent" ? 4 : 18 });
-    if (pth === "/settings") { Object.assign(P.me, { school: body.school_name || P.me.school, host_name: body.host_name || P.me.host_name, contact: body.contact, theme_color: body.theme_color || P.me.theme_color }); return ok({ ok: true }); }
+    if (pth === "/settings") { Object.assign(P.me, { school: body.school_name || P.me.school, host_name: body.host_name || P.me.host_name, contact: body.contact, theme_color: body.theme_color || P.me.theme_color, decor: body.decor ?? P.me.decor }); return ok({ ok: true }); }
     if (pth === "/server/prepare") {
       P.server = { ...P.server, state: "starting", label: "Включается…" };
       setTimeout(() => { P.server = { ...P.server, state: "ready", label: "Готов к эфиру" }; }, 6000);

@@ -741,6 +741,12 @@ export function applyTheme(value) {
   r.setProperty("--navy-2", mixColor(color, [10, 16, 30], 0.45));
 }
 
+// тематический узор школы: звёзды и натальная карта, геометрия, дорога
+const DECORS = [["", "Без узора", "—"], ["astro", "Астрология", "✦"], ["design", "Дизайн", "◆"], ["auto", "Автошкола", "🚗"]];
+export function applyDecor(d) {
+  if (d) document.documentElement.dataset.decor = d; else delete document.documentElement.dataset.decor;
+}
+
 // ---------- Настройки: школа, группы, команда, расходы ----------
 async function pageSettings() {
   const [me, staff] = await Promise.all([api("/me"), api("/staff"), loadGroups()]);
@@ -755,6 +761,12 @@ async function pageSettings() {
     style: hex.includes(",") ? `background:linear-gradient(135deg, ${hex.split(",")[0]} 55%, ${hex.split(",")[1]} 55%)` : `background:${hex}`, title: name, "aria-label": name, role: "radio", "aria-checked": hex === color ? "true" : "false",
     onclick: () => { color = hex; picker.value = hex; applyTheme(hex); paintSwatches(); } })), h("label", { class: "swatch custom", title: "Свой цвет" }, picker, h("span", { "aria-hidden": "true" }, "＋")));
   picker.addEventListener("input", () => { color = picker.value; applyTheme(color); paintSwatches(); });
+  let decor = me.decor || "";
+  const decors = h("div", { class: "decor-pick", role: "radiogroup", "aria-label": "Узор школы" });
+  const paintDecors = () => put(decors, ...DECORS.map(([key, name, ico]) => h("button", { type: "button", class: "decor-opt" + (key === decor ? " on" : ""),
+    role: "radio", "aria-checked": key === decor ? "true" : "false", "data-decor-preview": key,
+    onclick: () => { decor = key; applyDecor(key); paintDecors(); } }, h("span", { class: "decor-ico", "aria-hidden": "true" }, ico), name)));
+  paintDecors();
   if (color.includes(",")) picker.value = color.split(",")[0];
   paintSwatches();
   const schoolCard = h("div", { class: "card", id: "school" }, h("h2", {}, "Школа"),
@@ -763,7 +775,9 @@ async function pageSettings() {
     field("Куда ученикам писать вопросы", contact, "Появится кнопкой «✉️ Написать в школу», когда у ученика что-то не получается. Вопросы, написанные боту, и так приходят команде."),
     h("div", { class: "field" }, h("span", {}, "Цвет школы — панель, эфир и страница записи"), swatches,
       h("small", { class: "muted", style: "display:block;margin-top:6px" }, "Нажмите на цвет — увидите сразу. Сохранится после «Сохранить».")),
-    isHost() ? h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await api("/settings", { method: "PATCH", body: { school_name: school.value, host_name: hostName.value, contact: contact.value, theme_color: color } }); if (DEMO) { try { localStorage.setItem("kz_demo_theme", color); } catch (_) {} } toast("Сохранено ✓"); init(); } finally { done(); } } }, "Сохранить") : h("p", { class: "muted small" }, "Настройки школы меняет ведущая."));
+    h("div", { class: "field" }, h("span", {}, "Узор по теме школы — меню, вход на урок, эфир"), decors,
+      h("small", { class: "muted", style: "display:block;margin-top:6px" }, "Нужен свой узор под тему школы — напишите нам, нарисуем.")),
+    isHost() ? h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await api("/settings", { method: "PATCH", body: { school_name: school.value, host_name: hostName.value, contact: contact.value, theme_color: color, decor } }); if (DEMO) { try { localStorage.setItem("kz_demo_theme", color); localStorage.setItem("kz_demo_decor", decor); } catch (_) {} } toast("Сохранено ✓"); init(); } finally { done(); } } }, "Сохранить") : h("p", { class: "muted small" }, "Настройки школы меняет ведущая."));
 
   const gname = h("input", { type: "text", placeholder: "Например: Курс 2026", maxlength: 120 });
   const groupsCard = h("div", { class: "card", id: "groups" }, h("h2", {}, "Группы"),
@@ -860,6 +874,7 @@ async function init() {
     state.me = await api("/me");
   } catch (_) { return; }
   if (state.me.theme_color) applyTheme(state.me.theme_color);
+  applyDecor(state.me.decor || "");
   $("#school-name").textContent = state.me.school;
   $("#school-name-top").textContent = state.me.school;
   $("#me-label").textContent = `${state.me.label} · ${state.me.role_label}`;

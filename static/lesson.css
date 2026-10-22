@@ -180,3 +180,12 @@
 .r-top, .r-bar, .room.staff .r-bar { background: color-mix(in srgb, var(--navy) 42%, #10141e); }
 .ctl .ico, .room.staff .ctl .ico, .pres-ctl button, .pres-ctl .pres-file { background: color-mix(in srgb, var(--navy) 48%, #262d3c); }
 .top-btn:hover { background: color-mix(in srgb, var(--navy) 55%, #1c2230); }
+/* узор школы: экран входа и эфир */
+html[data-decor] body.lesson-body .join {
+  background-color: var(--navy);
+  background-image: var(--decor-mark), var(--decor-tile);
+  background-repeat: no-repeat, repeat; background-size: 520px, var(--decor-tile-size);
+  background-position: 50% 50%, 0 0;
+}
+html[data-decor] .room { background-image: var(--decor-tile); background-size: var(--decor-tile-size); }
+html[data-decor] .join-card { box-shadow: 0 24px 64px rgba(0, 0, 0, .35); }
