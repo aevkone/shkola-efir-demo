@@ -1,3 +1,5 @@
 .demo-bar { position: sticky; top: 0; z-index: 3000; background: #fff4d6; color: #6b4e10; font: 14px/1.4 -apple-system, "Segoe UI", Roboto, Arial, sans-serif; padding: 8px 14px; text-align: center; border-bottom: 1px solid #f0dfa8; }
 .demo-bar a { color: #2e6db4; font-weight: 700; }
 .room .demo-bar, body.lesson-body .demo-bar { position: relative; }
+/* в эфире плашка демо занимает место — эфир под неё */
+body.lesson-body .room { height: calc(100dvh - 38px); }

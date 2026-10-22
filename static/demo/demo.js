@@ -8,6 +8,18 @@
   const fail = (detail, status = 400) => ok({ detail }, status);
   const room = () => window.__fakeRoom;
   let seq = 900;
+
+  // цвет школы, выбранный в демо-настройках, — на всех демо-экранах
+  const mix = (hex, to, k) => "#" + [1, 3, 5].map((i, j) => Math.round(parseInt(hex.slice(i, i + 2), 16) + (to[j] - parseInt(hex.slice(i, i + 2), 16)) * k).toString(16).padStart(2, "0")).join("");
+  let savedTheme = "";
+  try { savedTheme = localStorage.getItem("kz_demo_theme") || ""; } catch (_) { /* приватный режим */ }
+  if (/^#[0-9a-f]{6}$/i.test(savedTheme)) {
+    const r = document.documentElement.style;
+    r.setProperty("--blue", savedTheme); r.setProperty("--blue-2", mix(savedTheme, [0, 0, 0], 0.18));
+    r.setProperty("--blue-soft", mix(savedTheme, [255, 255, 255], 0.88));
+    r.setProperty("--navy", mix(savedTheme, [10, 16, 30], 0.55)); r.setProperty("--navy-2", mix(savedTheme, [10, 16, 30], 0.45));
+    if (P.me) P.me.theme_color = savedTheme;
+  }
   const nid = () => ++seq;
 
   // плашка «Демонстрация»
@@ -141,7 +153,7 @@
     if (pth === "/staff" && method === "POST") { const s = { id: nid(), label: body.label, role: body.role, role_label: body.role === "host" ? "Ведущая" : "Модератор", status: "waiting", status_label: "Ждём вход", ...link(tok("adm_")) }; P.staff.items.push(s); return ok(s); }
     if ((m = pth.match(/^\/staff\/(\d+)$/))) { const s = P.staff.items.find((x) => x.id === Number(m[1])); if (body.disabled !== undefined) Object.assign(s, body.disabled ? { status: "disabled", status_label: "Отключён" } : { status: "active", status_label: "Активен" }); return ok(s); }
     if (pth === "/broadcast") return ok({ total: body.who === "absent" ? 4 : 18 });
-    if (pth === "/settings") { Object.assign(P.me, { school: body.school_name || P.me.school, host_name: body.host_name || P.me.host_name, contact: body.contact }); return ok({ ok: true }); }
+    if (pth === "/settings") { Object.assign(P.me, { school: body.school_name || P.me.school, host_name: body.host_name || P.me.host_name, contact: body.contact, theme_color: body.theme_color || P.me.theme_color }); return ok({ ok: true }); }
     if (pth === "/server/prepare") {
       P.server = { ...P.server, state: "starting", label: "Включается…" };
       setTimeout(() => { P.server = { ...P.server, state: "ready", label: "Готов к эфиру" }; }, 6000);

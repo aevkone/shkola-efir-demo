@@ -149,3 +149,23 @@
   .ctl.big { min-width: 0; flex: 1; }
   .pc-card .form-row { grid-template-columns: 1fr; }
 }
+
+/* поле чата всегда на виду: колонка не растёт вместе с перепиской */
+@media (min-width: 861px) {
+  .r-body { grid-template-rows: minmax(0, 1fr); }
+  .side-panel { overflow: hidden; }
+  .cam-tile { max-height: 28vh; aspect-ratio: auto; height: min(28vh, 214px); }
+}
+.panel-box { overflow: hidden; }
+.tab-body { overflow: hidden; }
+.chat { min-height: 0; }
+
+/* смайлики в чате */
+.emoji-btn { width: 46px; height: 46px; flex: none; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; font-size: 22px; cursor: pointer; }
+.emoji-tray { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; padding: 8px; background: #f5f7fb; border-radius: 12px; margin-top: 8px; flex: none; }
+.emoji-tray .emoji { min-height: 40px; border: 0; background: transparent; font-size: 22px; border-radius: 8px; cursor: pointer; }
+.emoji-tray .emoji:hover { background: #e6ecf5; }
+.pres-ctl .pres-file { padding: 0 12px; background: #2e3a52; }
+/* набор смайликов всплывает над полем ввода и не сжимает переписку */
+.panel-box { position: relative; }
+.emoji-tray { position: absolute; left: 12px; right: 12px; bottom: 66px; margin: 0; z-index: 5; background: #fff; box-shadow: 0 8px 28px rgba(16, 24, 40, .22); border: 1px solid var(--line); }

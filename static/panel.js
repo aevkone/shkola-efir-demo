@@ -299,6 +299,7 @@ function lessonForm() {
     h("div", { class: "form-row" }, field("Дата и время эфира", f.when), field("Длительность", f.duration)),
     field("Группа", f.group),
     h("label", { class: "check-row" }, f.open, h("span", {}, h("b", {}, "Открытый урок"), h("br"), h("span", { class: "muted small" }, "Смогут прийти все, у кого есть ссылка (доступ 10 дней)"))),
+    h("p", { class: "hint-box" }, "🔔 Ссылку ученикам рассылать не нужно. Урок сам появится у учеников группы в боте, а бот напомнит за сутки и за 15 минут — с кнопкой «Войти на урок»."),
   ), (close) => [
     h("button", { class: "btn outline", onclick: close }, "Отмена"),
     h("button", { class: "btn", onclick: async (e) => {
@@ -310,7 +311,9 @@ function lessonForm() {
           title: f.title.value, starts_at_local: f.when.value, duration_min: Number(f.duration.value),
           group_id: Number(f.group.value) || null, visibility: f.open.checked ? "link" : "group",
         } });
-        close(); toast("Урок создан"); go(`/panel/lessons/${l.id}`);
+        close();
+        toast(l.students ? `Урок создан. Напоминание придёт само ${l.students} ${plural(l.students, "ученику", "ученикам", "ученикам")} группы — рассылать ничего не нужно` : "Урок создан. Ученики группы получат напоминание сами", false);
+        go(`/panel/lessons/${l.id}`);
       } catch (_) { done(); }
     } }, "Создать урок"),
   ]);
@@ -502,6 +505,8 @@ function renderLesson(l) {
         field("Название", titleIn),
         l.kind === "live" ? h("div", { class: "form-row" }, field("Дата и время", whenIn), field("Длительность", durIn)) : null,
         field("Группа", groupIn),
+        l.kind === "live" && l.status !== "finished" ? h("p", { class: "hint-box" },
+          `🔔 Напоминание с кнопкой «Войти на урок» придёт само за сутки и за 15 минут: ${l.students ? `${l.students} ${plural(l.students, "ученику", "ученикам", "ученикам")} группы «${l.group}»` : "ученикам группы"}${l.visibility === "link" ? " и всем, кто пришёл по ссылке" : ""}. Рассылать ссылку не нужно.`) : null,
         toggle("notify-toggle", l.notify_students, "Сообщать ученикам о готовой записи и новых материалах", (e) => saveNow({ notify_students: e.target.checked })),
         h("div", { class: "danger" },
           h("button", { class: "link-btn", onclick: () => copyLessonDialog(l) }, "📋 Скопировать урок"),
@@ -592,7 +597,8 @@ async function pageStudents() {
       h("thead", {}, h("tr", {}, h("th", { scope: "col" }, "Ученик"), h("th", { scope: "col" }, "Статус"), h("th", { scope: "col" }, "Доступ до"), h("th", {}, h("span", { class: "sr-only" }, "Действие")))),
       h("tbody", {}, shown.length ? shown.map(rowFor) : h("tr", {}, h("td", { colspan: 4, class: "empty" }, "Здесь никого."))))
       : h("div", { class: "empty" }, h("p", {}, "В группе пока никого."), h("button", { class: "btn", onclick: () => inviteDialog(gid) }, "+ Пригласить учеников"))),
-    h("p", { class: "muted small", style: "margin-top:16px" }, "Мы не храним ФИО, телефоны и почты. Имя ученика видите только вы."));
+    h("p", { class: "hint-box", style: "margin-top:16px" }, "💡 Ученика приглашают один раз: он открывает личную ссылку и попадает в бот школы. Дальше все уроки его группы появляются у него сами, бот присылает напоминания с кнопкой «Войти на урок»."),
+    h("p", { class: "muted small", style: "margin-top:10px" }, "Мы не храним ФИО, телефоны и почты. Имя ученика видите только вы."));
 }
 
 let inviteTpl = null;
@@ -712,6 +718,23 @@ async function pageRecordings() {
       h("tbody", {}, rows)) : h("div", { class: "empty" }, "Записей пока нет. Они появятся после первого урока.")));
 }
 
+// ---------- цвет школы ----------
+const THEMES = [["#2e6db4", "Синий"], ["#1f8a5b", "Зелёный"], ["#6b4fbb", "Фиолетовый"], ["#a33a54", "Бордовый"],
+  ["#138496", "Бирюзовый"], ["#c8641c", "Оранжевый"], ["#b5487f", "Розовый"], ["#3d4a5c", "Графит"]];
+function mixColor(hex, to, k) {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return "#" + c.map((x, i) => Math.round(x + (to[i] - x) * k).toString(16).padStart(2, "0")).join("");
+}
+export function applyTheme(color) {
+  const r = document.documentElement.style;
+  if (!/^#[0-9a-f]{6}$/i.test(color || "")) return;
+  r.setProperty("--blue", color);
+  r.setProperty("--blue-2", mixColor(color, [0, 0, 0], 0.18));
+  r.setProperty("--blue-soft", mixColor(color, [255, 255, 255], 0.88));
+  r.setProperty("--navy", mixColor(color, [10, 16, 30], 0.55));
+  r.setProperty("--navy-2", mixColor(color, [10, 16, 30], 0.45));
+}
+
 // ---------- Настройки: школа, группы, команда, расходы ----------
 async function pageSettings() {
   const [me, staff] = await Promise.all([api("/me"), api("/staff"), loadGroups()]);
@@ -719,11 +742,21 @@ async function pageSettings() {
   const school = h("input", { type: "text", value: me.school, maxlength: 80 });
   const hostName = h("input", { type: "text", value: me.host_name, maxlength: 60 });
   const contact = h("input", { type: "text", value: me.contact || "", placeholder: "@username модератора или ссылка", maxlength: 120 });
+  let color = me.theme_color || "#2e6db4";
+  const picker = h("input", { type: "color", value: color, "aria-label": "Свой цвет", class: "color-pick" });
+  const swatches = h("div", { class: "swatches", role: "radiogroup", "aria-label": "Цвет школы" });
+  const paintSwatches = () => put(swatches, ...THEMES.map(([hex, name]) => h("button", { type: "button", class: "swatch" + (hex === color ? " on" : ""),
+    style: `background:${hex}`, title: name, "aria-label": name, role: "radio", "aria-checked": hex === color ? "true" : "false",
+    onclick: () => { color = hex; picker.value = hex; applyTheme(hex); paintSwatches(); } })), h("label", { class: "swatch custom", title: "Свой цвет" }, picker, h("span", { "aria-hidden": "true" }, "＋")));
+  picker.addEventListener("input", () => { color = picker.value; applyTheme(color); paintSwatches(); });
+  paintSwatches();
   const schoolCard = h("div", { class: "card", id: "school" }, h("h2", {}, "Школа"),
     field("Название (видно в боте и эфире)", school),
     field("Имя ведущей", hostName),
     field("Куда ученикам писать вопросы", contact, "Появится кнопкой «✉️ Написать в школу», когда у ученика что-то не получается. Вопросы, написанные боту, и так приходят команде."),
-    isHost() ? h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await api("/settings", { method: "PATCH", body: { school_name: school.value, host_name: hostName.value, contact: contact.value } }); toast("Сохранено ✓"); init(); } finally { done(); } } }, "Сохранить") : h("p", { class: "muted small" }, "Настройки школы меняет ведущая."));
+    h("div", { class: "field" }, h("span", {}, "Цвет школы — панель, эфир и страница записи"), swatches,
+      h("small", { class: "muted", style: "display:block;margin-top:6px" }, "Нажмите на цвет — увидите сразу. Сохранится после «Сохранить».")),
+    isHost() ? h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await api("/settings", { method: "PATCH", body: { school_name: school.value, host_name: hostName.value, contact: contact.value, theme_color: color } }); if (DEMO) { try { localStorage.setItem("kz_demo_theme", color); } catch (_) {} } toast("Сохранено ✓"); init(); } finally { done(); } } }, "Сохранить") : h("p", { class: "muted small" }, "Настройки школы меняет ведущая."));
 
   const gname = h("input", { type: "text", placeholder: "Например: Курс 2026", maxlength: 120 });
   const groupsCard = h("div", { class: "card", id: "groups" }, h("h2", {}, "Группы"),
@@ -792,10 +825,10 @@ function tourSteps() {
   const steps = [
     { title: host ? `Здравствуйте, ${state.me.label}! 👋` : "Добро пожаловать! 👋", text: "Покажу панель за минуту: где уроки, ученики и записи. Можно пропустить и вернуться к подсказкам кнопкой «?» внизу справа." },
     { el: "#nav a[data-page='lessons']", title: "Уроки", text: "Все уроки — прошедшие и будущие. Нажмите на урок, чтобы добавить материалы, поменять дату или посмотреть запись." },
-    { el: "#btn-new-lesson", title: "Новый урок", text: "Название, дата, группа — и всё. Ученики сами получат напоминание за сутки и за 15 минут." },
+    { el: "#btn-new-lesson", title: "Новый урок", text: "Название, дата, группа — и всё. Ссылку рассылать не нужно: ученики группы сами получат в боте напоминание с кнопкой «Войти на урок» — за сутки и за 15 минут." },
     { el: "#btn-start", title: "Начать урок", text: "В день урока нажмите здесь — откроется эфир. Сервер эфиров включается сам за 30 минут до начала." },
     { el: "#btn-video", title: "Видеоурок", text: "Можно записать урок без зрителей — он появится у группы в «Записях»." },
-    { el: "#nav a[data-page='students']", title: "Ученики", text: "Пригласите учеников: каждый получит личную ссылку. Здесь же — закрыть или вернуть доступ." },
+    { el: "#nav a[data-page='students']", title: "Ученики", text: "Учеников приглашают один раз: каждый получает личную ссылку и попадает в бот. Дальше все уроки группы приходят ему сами. Здесь же — закрыть или вернуть доступ." },
     { el: "#nav a[data-page='recordings']", title: "Записи", text: "Записи появляются сами после урока. Ученикам приходит сообщение «Запись готова»." },
     { el: "#nav a[data-page='settings']", title: "Настройки", text: "Группы, команда школы, контакт для вопросов учеников и расходы на сервер." },
     { el: ".tour-help", title: "Подсказки — всегда здесь", text: "Нажмите «?», чтобы посмотреть это знакомство ещё раз." },
@@ -819,6 +852,7 @@ async function init() {
   try {
     state.me = await api("/me");
   } catch (_) { return; }
+  if (state.me.theme_color) applyTheme(state.me.theme_color);
   $("#school-name").textContent = state.me.school;
   $("#school-name-top").textContent = state.me.school;
   $("#me-label").textContent = `${state.me.label} · ${state.me.role_label}`;

@@ -51,6 +51,7 @@
           <button id="pres-prev" aria-label="Предыдущий слайд">◀</button>
           <span id="pres-page" aria-live="polite">1 / 1</span>
           <button id="pres-next" aria-label="Следующий слайд">▶</button>
+          <button id="pres-file" class="pres-file" title="Открыть другую презентацию">📂 Другой файл</button>
           <button id="pres-close" class="pres-x">Убрать слайды</button>
         </div>
         <button id="audio-unlock" class="audio-unlock hidden">🔊 Нажмите, чтобы включить звук</button>
@@ -84,7 +85,9 @@
             </div>
             <div class="chat-title">💬 Чат <span id="chat-closed" class="chip red small hidden">закрыт</span><span id="chat-count" class="muted small chat-count"></span></div>
             <div class="chat" id="chat" aria-live="polite"></div>
+            <div class="emoji-tray hidden" id="emoji-tray" role="listbox" aria-label="Смайлики"></div>
             <form class="chat-form" id="chat-form">
+              <button type="button" class="emoji-btn" id="emoji-btn" aria-label="Смайлики" aria-expanded="false">😊</button>
               <label class="sr-only" for="chat-input">Сообщение в чат</label>
               <input id="chat-input" type="text" maxlength="1000" placeholder="Написать в чат…" autocomplete="off" enterkeyhint="send">
               <button class="btn small" type="submit" aria-label="Отправить сообщение">➤</button>
