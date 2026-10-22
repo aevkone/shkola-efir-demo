@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Бот школы — демонстрация</title>
+  <link rel="stylesheet" href="static/base.css">
+  <link rel="stylesheet" href="static/demo/demo.css">
+  <script src="static/demo/demo_data.js"></script>
+  <style>
+    html, body { height: 100%; }
+    body { display: flex; flex-direction: column; background: #dfe7ef; font-size: 16px; }
+    .tg-head { display: flex; align-items: center; gap: 12px; background: #fff; padding: 10px 14px; border-bottom: 1px solid #e3e8ef; flex: none; }
+    .tg-ava { width: 42px; height: 42px; border-radius: 50%; background: #2e6db4; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+    .tg-head b { display: block; }
+    .tg-head span { color: var(--muted); font-size: 13px; }
+    .chat { flex: 1; overflow-y: auto; padding: 14px 10px; display: flex; flex-direction: column; gap: 8px; }
+    .bub { max-width: 86%; background: #fff; border-radius: 16px 16px 16px 4px; padding: 9px 12px; line-height: 1.42; box-shadow: 0 1px 1px rgba(0,0,0,.06); white-space: pre-wrap; word-wrap: break-word; }
+    .bub.me { align-self: flex-end; background: #e1f6cb; border-radius: 16px 16px 4px 16px; }
+    .bub a { color: #2e6db4; }
+    .bub img { width: 100%; border-radius: 10px; display: block; margin-bottom: 6px; }
+    .doc { display: flex; gap: 10px; align-items: center; }
+    .doc .ic { width: 44px; height: 44px; border-radius: 50%; background: #2e6db4; color: #fff; display: grid; place-items: center; flex: none; font-size: 20px; }
+    .ikb { display: grid; gap: 6px; margin-top: 4px; max-width: 86%; }
+    .ikb button, .ikb a { background: rgba(255,255,255,.92); border: 0; border-radius: 10px; min-height: 42px; font: inherit; font-weight: 600; color: #2e6db4; cursor: pointer; text-decoration: none; display: flex; align-items: center; justify-content: center; padding: 0 10px; text-align: center; }
+    .kb { flex: none; background: #f3f5f8; padding: 8px; display: grid; gap: 6px; border-top: 1px solid #e3e8ef; }
+    .kb button { min-height: 46px; border: 0; border-radius: 10px; background: #fff; font: inherit; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,.08); cursor: pointer; }
+    .input { flex: none; display: flex; gap: 8px; padding: 8px; background: #fff; border-top: 1px solid #e3e8ef; }
+    .input input { height: 44px; border-radius: 22px; font-size: 16px; }
+    .input button { width: 44px; height: 44px; border-radius: 50%; border: 0; background: #2e6db4; color: #fff; font-size: 18px; cursor: pointer; flex: none; }
+    .start { margin: auto; text-align: center; padding: 20px; }
+    .start p { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="tg-head"><div class="tg-ava">Ш</div><div><b id="title">Школа Елены</b><span>бот</span></div></div>
+  <div class="chat" id="chat">
+    <div class="start" id="start"><p>Ученик получил от школы личную ссылку и нажал на неё.<br>Telegram открыл бота школы.</p>
+      <button class="btn big" id="go">ЗАПУСТИТЬ</button></div>
+  </div>
+  <div class="kb hidden" id="kb">
+    <button data-k="join">▶️ Войти на урок</button>
+    <button data-k="materials">📁 Материалы</button>
+    <button data-k="records">🎬 Записи</button>
+  </div>
+  <form class="input hidden" id="form"><input id="msg" placeholder="Сообщение (например, вопрос школе)" autocomplete="off"><button aria-label="Отправить">➤</button></form>
+  <script type="module">
+    import { startTour } from "./static/tour.js";
+    const B = (window.KZ_DEMO_DATA || {}).bot || {};
+    document.getElementById("title").textContent = B.school || "Школа";
+    const chat = document.getElementById("chat");
+    const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
+    const scroll = () => { chat.scrollTop = chat.scrollHeight; };
+    function me(text) { chat.append(el("div", "bub me", text.replace(/</g, "&lt;"))); scroll(); }
+    function show(outs) {
+      outs.forEach((o, i) => setTimeout(() => {
+        if (o.photo) { const b = el("div", "bub"); b.append(el("img", "", "")); b.querySelector("img").src = "static/help/instruction.png"; b.querySelector("img").alt = "Инструкция"; b.append(el("div", "", o.caption)); chat.append(b); }
+        else if (o.doc) { const b = el("div", "bub doc", `<span class="ic">⬇</span><span>${o.caption}</span>`); b.style.cursor = "pointer"; b.onclick = () => alert("В Telegram файл откроется, на iPhone — ⬆ → «Сохранить в Файлы»."); chat.append(b); }
+        else if (o.text) chat.append(el("div", "bub", o.text));
+        if (o.buttons && o.buttons.length) {
+          const kb = el("div", "ikb");
+          o.buttons.forEach((row) => row.forEach((b) => {
+            if (b.url) { const a = el("a", "", b.text); a.href = b.url; a.target = "_blank"; kb.append(a); }
+            else { const btn = el("button", "", b.text); btn.onclick = () => onCb(b.cb, b.text); kb.append(btn); }
+          }));
+          chat.append(kb);
+        }
+        scroll();
+      }, 350 * i + 250));
+    }
+    function onCb(cb, text) {
+      if (cb.startsWith("mat:")) { me(text); show((B.mat || {})[cb.slice(4)] || []); }
+      else if (cb === "menu:records") show(B.records || []);
+      else if (cb === "menu:materials") show(B.materials || []);
+    }
+    document.getElementById("go").onclick = () => {
+      document.getElementById("start").remove();
+      me("/start");
+      show(B.start || []);
+      setTimeout(() => {
+        document.getElementById("kb").classList.remove("hidden");
+        document.getElementById("form").classList.remove("hidden");
+        startTour("bot", [
+          { el: "#kb", title: "Три кнопки внизу", text: "Всё, что нужно ученику: войти на урок, получить материалы, посмотреть записи. Нажмите любую." },
+          { el: "#msg", title: "Вопрос школе", text: "Можно просто написать вопрос — он придёт команде школы, ответ вернётся сюда." },
+        ]);
+      }, 1500);
+    };
+    document.querySelectorAll("#kb button").forEach((b) => b.onclick = () => { me(b.textContent); show(B[b.dataset.k] || []); });
+    document.getElementById("form").onsubmit = (e) => {
+      e.preventDefault();
+      const v = document.getElementById("msg").value.trim();
+      if (!v) return;
+      document.getElementById("msg").value = "";
+      me(v);
+      show(B.question || []);
+      setTimeout(() => show(B.answer || []), 3500);
+    };
+  </script>
+</body>
+</html>

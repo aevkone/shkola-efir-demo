@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Панель управления — демонстрация</title>
+  <link rel="stylesheet" href="static/base.css">
+  <link rel="stylesheet" href="static/panel.css">
+  <link rel="stylesheet" href="static/demo/demo.css">
+  <script>window.KZ_DEMO = {"panel": true};</script>
+  <script src="static/demo/demo_data.js"></script>
+  <script src="static/demo/demo.js"></script>
+</head>
+<body>
+  <div class="layout">
+    <aside class="side" id="side">
+      <div class="brand"><span>🌿</span> <b id="school-name">Школа</b></div>
+      <nav id="nav" aria-label="Разделы">
+        <a href="/panel" data-page="lessons">📅 Уроки</a>
+        <a href="/panel/students" data-page="students">👥 Ученики</a>
+        <a href="/panel/recordings" data-page="recordings">🎬 Записи</a>
+        <a href="/panel/settings" data-page="settings">⚙️ Настройки</a>
+      </nav>
+      <div class="side-foot">
+        <div id="me-label">…</div>
+        <button class="link-btn" id="logout">Выйти</button>
+      </div>
+    </aside>
+    <header class="topbar">
+      <button class="burger" id="burger" aria-label="Открыть меню">☰</button>
+      <b id="school-name-top">Школа</b>
+    </header>
+    <main class="main" id="main">
+      <div class="loading"><span class="spinner"></span></div>
+    </main>
+  </div>
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+  <script src="static/panel.js" type="module"></script>
+</body>
+</html>

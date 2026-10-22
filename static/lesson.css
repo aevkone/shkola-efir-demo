@@ -1,0 +1,151 @@
+/* Страница эфира: по макетам «Урок глазами Елены» и «На телефоне ученика». */
+.lesson-body { background: #eef2f8; min-height: 100vh; }
+.center { text-align: center; }
+
+/* вход */
+.join { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+.join-card { background: #fff; border-radius: 22px; padding: 36px 32px; width: min(460px, 100%); box-shadow: var(--shadow); }
+.j-status { font-weight: 800; color: var(--green); letter-spacing: .04em; margin-bottom: 14px; text-transform: uppercase; font-size: 15px; }
+.j-status.soon { color: var(--blue); }
+.join-card h1 { font-size: 34px; margin-bottom: 12px; }
+.join-card p.muted { margin: 0 0 26px; font-size: 16px; }
+#j-name { height: 56px; font-size: 18px; border: 2px solid var(--blue); border-radius: 14px; }
+.j-wait { display: flex; gap: 14px; align-items: center; background: var(--blue-soft); border-radius: 14px; padding: 16px; margin-top: 18px; color: #234; }
+.j-error { color: var(--red); background: var(--red-soft); padding: 14px 16px; border-radius: 12px; margin-top: 16px; }
+
+/* эфир */
+.room { height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: #121826; color: #fff; }
+.r-top {
+  display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 28px;
+  background: #182033; font-size: 16px; flex: none;
+}
+.r-title { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.r-group { color: #c7d0df; }
+.r-group::before { content: "· "; }
+.r-group:empty::before { content: ""; }
+.r-top-right { display: flex; align-items: center; gap: 22px; flex: none; }
+.r-rec { background: var(--red); color: #fff; font-weight: 800; border-radius: 9px; padding: 6px 14px; font-variant-numeric: tabular-nums; }
+.r-count::before { content: "👥 "; }
+.r-body { flex: 1; display: grid; grid-template-columns: 1fr 380px; gap: 16px; padding: 16px; min-height: 0; }
+.stage { position: relative; background: #0b0f19; border-radius: 14px; overflow: hidden; min-height: 0; display: flex; }
+.stage-main { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.stage-main video, .stage-main canvas { width: 100%; height: 100%; object-fit: contain; background: #0b0f19; }
+.stage-empty { color: #8a96ab; font-size: 18px; padding: 24px; text-align: center; }
+.stage-label {
+  position: absolute; left: 22px; top: 18px; background: var(--blue); color: #fff; font-weight: 700;
+  padding: 6px 14px; border-radius: 9px; z-index: 3; font-size: 15px;
+}
+.pip {
+  position: absolute; right: 14px; bottom: 14px; width: 22%; min-width: 120px; aspect-ratio: 4/3; border-radius: 12px;
+  overflow: hidden; background: #2a3346; z-index: 3; box-shadow: 0 4px 18px rgba(0, 0, 0, .4);
+}
+.pip video { width: 100%; height: 100%; object-fit: cover; }
+.pres-ctl {
+  position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 10px; align-items: center;
+  background: rgba(17, 24, 39, .85); padding: 8px 12px; border-radius: 12px; z-index: 4;
+}
+.pres-ctl button { background: #2e3a52; color: #fff; border: 0; border-radius: 8px; height: 36px; min-width: 42px; cursor: pointer; font-size: 15px; }
+.pres-ctl .pres-x { padding: 0 12px; background: #4b2530; }
+.audio-unlock {
+  position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 5; background: var(--blue); color: #fff;
+  border: 0; border-radius: 14px; padding: 16px 22px; font-weight: 700; font-size: 17px; cursor: pointer;
+}
+
+.side-panel { display: flex; flex-direction: column; gap: 16px; min-height: 0; }
+.cam-tile { position: relative; aspect-ratio: 16/9; border-radius: 14px; overflow: hidden; background: #2a3346; flex: none; }
+.cam-tile video { width: 100%; height: 100%; object-fit: cover; }
+.tile-name { position: absolute; left: 12px; bottom: 10px; font-weight: 700; text-shadow: 0 1px 4px rgba(0, 0, 0, .6); }
+.panel-box { background: #fff; color: var(--text); border-radius: 14px; flex: 1; display: flex; flex-direction: column; min-height: 0; padding: 14px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; flex: none; }
+.tab { height: 40px; border: 0; border-radius: 10px; background: #f0f2f6; font-weight: 700; cursor: pointer; color: var(--text); }
+.tab.on { background: var(--blue); color: #fff; }
+.tab-body { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.hands { flex: none; margin-bottom: 8px; }
+.hands-title, .chat-title { font-weight: 800; color: var(--navy); margin: 4px 0 8px; display: flex; gap: 8px; align-items: center; }
+.hand-row { display: flex; align-items: center; justify-content: space-between; background: #fff8e1; border-radius: 10px; padding: 8px 10px 8px 14px; margin-bottom: 8px; gap: 8px; }
+.hand-row .btn { height: 32px; }
+.chat { flex: 1; overflow-y: auto; min-height: 60px; padding-right: 4px; overscroll-behavior: contain; }
+.msg { margin: 0 0 8px; line-height: 1.4; word-wrap: break-word; }
+.msg b { color: var(--blue); }
+.msg.staff b { color: var(--green-2); }
+.msg.sys { color: var(--muted); font-size: 14px; }
+.chat-form { display: flex; gap: 8px; margin-top: 8px; flex: none; }
+.chat-form input { height: 42px; font-size: 16px; }
+.person { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.person .who { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.person .acts { display: flex; gap: 6px; flex: none; }
+.role-tag { color: var(--muted); font-size: 13px; margin-left: 6px; }
+
+/* нижняя панель */
+.r-bar { display: flex; justify-content: center; align-items: flex-start; gap: 14px; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); background: #182033; flex: none; flex-wrap: wrap; }
+.ctl { display: flex; flex-direction: column; align-items: center; gap: 6px; background: none; border: 0; color: #dbe3f0; cursor: pointer; min-width: 84px; font-size: 14px; padding: 0; }
+.ctl .ico { width: 58px; height: 58px; border-radius: 50%; background: #2c3850; display: grid; place-items: center; font-size: 24px; transition: background .15s; }
+.ctl.on .ico { background: var(--blue); }
+.ctl.warn .ico { background: #3a2a33; }
+.ctl.danger .ico { background: var(--red); }
+.ctl:disabled { opacity: .45; cursor: default; }
+.ctl:hover:not(:disabled) .ico { filter: brightness(1.15); }
+.sep { width: 1px; align-self: stretch; background: #34405a; margin: 4px 6px; }
+
+/* телефон */
+@media (max-width: 860px) {
+  .r-top { padding: 10px 14px; font-size: 14px; }
+  .r-count, .r-role { display: none; }
+  .r-body { grid-template-columns: 1fr; grid-template-rows: auto 1fr; padding: 0; gap: 0; }
+  .stage { border-radius: 0; aspect-ratio: 16/10; max-height: 46vh; }
+  .stage-label { display: none; }
+  .pip { width: 30%; min-width: 90px; right: 8px; bottom: 8px; }
+  .side-panel { gap: 0; }
+  .side-panel .cam-tile { display: none; }
+  .panel-box { border-radius: 0; padding: 12px 14px; }
+  .tabs { display: none; }
+  .r-bar { gap: 4px; justify-content: space-around; background: #f3f5f9; }
+  .ctl { min-width: 70px; color: #3b4658; font-size: 13px; }
+  .ctl .ico { width: 54px; height: 54px; background: #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, .12); }
+  .ctl.on .ico { background: var(--blue); }
+  .room.staff .r-bar { background: #182033; }
+  .room.staff .ctl { color: #dbe3f0; }
+  .room.staff .ctl .ico { background: #2c3850; box-shadow: none; }
+  .room.staff .ctl.on .ico { background: var(--blue); }
+  .room.staff .ctl.danger .ico { background: var(--red); }
+  .sep { display: none; }
+  .join-card h1 { font-size: 30px; }
+}
+@media (max-width: 860px) and (orientation: landscape) {
+  .r-body { grid-template-columns: 1fr 320px; grid-template-rows: 1fr; }
+  .stage { aspect-ratio: auto; max-height: none; }
+}
+
+/* упрощение по итогам совета */
+.top-btn { min-height: 40px; padding: 0 14px; border-radius: 10px; border: 1.5px solid #3a4763; background: transparent; color: #dbe3f0; font: inherit; font-size: 14px; cursor: pointer; }
+.top-btn:hover { background: #24304a; }
+.ctl.big .ico { width: 64px; height: 64px; font-size: 28px; }
+.ctl.big { min-width: 130px; font-size: 15px; font-weight: 600; }
+.ctl.dim .ico { opacity: .55; }
+.ctl:disabled { opacity: .6; }
+.hand-acts { display: flex; gap: 6px; align-items: center; }
+.hand-row .btn { min-height: 40px; }
+.tab { min-height: 44px; height: auto; }
+.chat-form input { height: 46px; }
+.pres-ctl button { min-height: 44px; min-width: 48px; }
+.chat-count { margin-left: auto; font-weight: 500; }
+.role-tag { color: var(--muted); font-size: 12px; margin: 0 2px 0 6px; font-weight: 600; }
+.msg.staff .role-tag { color: var(--green-2); }
+.precheck { position: absolute; inset: 0; z-index: 6; background: rgba(11, 15, 25, .92); display: flex; align-items: center; justify-content: center; padding: 16px; overflow: auto; }
+.pc-card { background: #fff; color: var(--text); border-radius: 18px; padding: 22px; width: min(520px, 100%); }
+.pc-card h2 { margin-bottom: 6px; }
+.pc-video { aspect-ratio: 16/9; background: #121826; border-radius: 12px; display: grid; place-items: center; overflow: hidden; margin: 12px 0; color: #aab4c4; text-align: center; padding: 8px; }
+.pc-video video { width: 100%; height: 100%; object-fit: cover; }
+.pc-meter { height: 10px; background: var(--gray-soft); border-radius: 6px; overflow: hidden; }
+.pc-meter span { display: block; height: 100%; width: 0; background: var(--green); transition: width .08s; }
+.pc-card .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 8px; }
+.pc-card select { height: 44px; font-size: 15px; }
+@media (max-width: 860px) {
+  .r-top-right { gap: 8px; }
+  .top-btn { min-height: 36px; padding: 0 10px; font-size: 13px; }
+  /* у команды на телефоне вкладки видны: «Участники» нужны */
+  .room.staff .tabs { display: grid; }
+  .ctl.big .ico { width: 60px; height: 60px; }
+  .ctl.big { min-width: 0; flex: 1; }
+  .pc-card .form-row { grid-template-columns: 1fr; }
+}

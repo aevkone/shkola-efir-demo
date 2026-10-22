@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Платформа онлайн-уроков — демонстрация</title>
+  <link rel="stylesheet" href="static/base.css">
+  <style>
+    body { background: #eef2f8; }
+    .hero { background: #1f3866; color: #fff; padding: 48px 20px 64px; }
+    .hero .in, .wrap { max-width: 1120px; margin: 0 auto; }
+    .hero h1 { font-size: 40px; margin-bottom: 12px; }
+    .hero p { font-size: 19px; color: #cfdaf0; max-width: 760px; margin: 0; line-height: 1.5; }
+    .wrap { padding: 0 20px 60px; margin-top: -36px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .tile { background: #fff; border-radius: 20px; box-shadow: var(--shadow); padding: 24px; display: flex; flex-direction: column; gap: 10px; }
+    .tile h2 { font-size: 21px; }
+    .tile p { margin: 0; color: var(--muted); flex: 1; }
+    .tile .who { font-size: 13px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: var(--blue); }
+    .tile .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 6px; }
+    .phones { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; margin-top: 28px; }
+    .phone { background: #fff; border-radius: 20px; box-shadow: var(--shadow); padding: 20px; text-align: center; }
+    .phone h2 { font-size: 20px; margin-bottom: 4px; }
+    .phone p { margin: 0 0 14px; color: var(--muted); }
+    .frame { width: 360px; max-width: 100%; height: 720px; margin: 0 auto; border: 12px solid #111; border-radius: 42px; overflow: hidden; background: #000; }
+    .frame iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+    .note { background: #fff; border-radius: 16px; padding: 18px 22px; margin-top: 28px; color: #3b4658; line-height: 1.55; }
+    .note b { color: var(--text); }
+    .reset { margin-top: 18px; }
+    @media (max-width: 600px) { .hero h1 { font-size: 30px; } .frame { height: 640px; } }
+  </style>
+</head>
+<body>
+  <header class="hero"><div class="in">
+    <h1>Платформа онлайн-уроков</h1>
+    <p>Демонстрация для школы Елены: бот ученика, эфир с экраном и камерой, материалы и записи в одно нажатие, панель управления. На каждом экране при первом открытии включается <b>экскурсия</b> — пошаговые подсказки по кнопкам.</p>
+  </div></header>
+  <main class="wrap">
+    <div class="grid">
+      <div class="tile"><span class="who">Елена и модератор</span><h2>📅 Панель управления</h2>
+        <p>Уроки, ученики, записи и настройки. Пригласить учеников списком, перенести урок с сообщением ученикам, посмотреть, кто был на уроке.</p>
+        <div class="row"><a class="btn" href="panel.html" target="_blank">Открыть панель</a></div></div>
+      <div class="tile"><span class="who">Елена</span><h2>🎥 Эфир ведущей</h2>
+        <p>Проверка камеры и звука перед эфиром, показ экрана и слайдов, чат, поднятые руки, «Дать слово», запись. Ученики и чат в демо — имитация.</p>
+        <div class="row"><a class="btn" href="lesson-host.html" target="_blank">Открыть эфир</a><a class="btn outline" href="lesson-host.html?video=1" target="_blank">Видеоурок</a></div></div>
+      <div class="tile"><span class="who">Ученик · гость</span><h2>📱 Эфир ученика</h2>
+        <p>Экран ведущей крупно, её камера в углу, чат и две крупные кнопки: «Поднять руку» и «Микрофон». Поднимите руку — через 5 секунд «ведущая» даст слово.</p>
+        <div class="row"><a class="btn" href="lesson-student.html" target="_blank">Как ученик</a><a class="btn outline" href="lesson-guest.html" target="_blank">Как гость</a></div></div>
+      <div class="tile"><span class="who">Ученик</span><h2>🤖 Бот школы</h2>
+        <p>Личная ссылка, три кнопки «Войти на урок», «Материалы», «Записи», картинка-инструкция, вопрос в школу. Тексты — настоящие, из платформы.</p>
+        <div class="row"><a class="btn" href="bot.html" target="_blank">Открыть бота</a></div></div>
+      <div class="tile"><span class="who">Ученик</span><h2>🎬 Запись урока</h2>
+        <p>Просмотр с телефона, «Скачать» — если ведущая разрешила, продолжение с того места, где остановились.</p>
+        <div class="row"><a class="btn" href="record.html" target="_blank">Открыть запись</a></div></div>
+      <div class="tile"><span class="who">Ученикам</span><h2>🖼 Инструкция на одну картинку</h2>
+        <p>Отправляется вместе с личной ссылкой и приходит в бот при первом входе.</p>
+        <div class="row"><a class="btn outline" href="static/help/instruction.png" target="_blank">Посмотреть</a></div></div>
+    </div>
+
+    <div class="phones">
+      <div class="phone"><h2>Ученик на телефоне</h2><p>Так урок выглядит на iPhone или Android</p>
+        <div class="frame"><iframe src="lesson-student.html" title="Эфир ученика на телефоне" allow="microphone; camera; autoplay"></iframe></div></div>
+      <div class="phone"><h2>Бот ученика</h2><p>Нажимайте кнопки внизу, как в Telegram</p>
+        <div class="frame"><iframe src="bot.html" title="Бот ученика"></iframe></div></div>
+    </div>
+
+    <div class="note">
+      <b>Что это за версия.</b> Это демонстрация интерфейса прямо в браузере: данные примерные, изменения не сохраняются, ученики и чат в эфире — имитация, камера ведущей — картинка-заглушка (показ экрана работает по-настоящему). Рабочая платформа ставится на ваш сервер, эфир идёт через ваш сервер эфиров, бот работает в Telegram.
+      <div class="reset"><button class="btn outline" id="reset">↺ Показать экскурсии заново на всех экранах</button></div>
+    </div>
+  </main>
+  <script>
+    document.getElementById("reset").onclick = () => {
+      try { Object.keys(localStorage).filter((k) => k.startsWith("tour_") || k.startsWith("kz_") || k.startsWith("rec_pos")).forEach((k) => localStorage.removeItem(k)); } catch (_) {}
+      document.querySelectorAll("iframe").forEach((f) => { f.src = f.src; });
+      const b = document.getElementById("reset"); b.textContent = "Готово — экскурсии покажутся снова"; setTimeout(() => { b.textContent = "↺ Показать экскурсии заново на всех экранах"; }, 2500);
+    };
+  </script>
+</body>
+</html>

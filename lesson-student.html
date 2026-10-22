@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#121826">
+  <title>Эфир ученика — демонстрация</title>
+  <link rel="stylesheet" href="static/base.css">
+  <link rel="stylesheet" href="static/lesson.css">
+  <link rel="stylesheet" href="static/demo/demo.css">
+  <script>window.KZ_DEMO = {"role": "student", "lessonId": 6};</script>
+  <script src="static/demo/demo_data.js"></script>
+  <script src="static/demo/demo.js"></script>
+</head>
+<body class="lesson-body">
+  <!-- экран входа -->
+  <section id="screen-join" class="join hidden">
+    <div class="join-card">
+      <div id="j-status" class="j-status"></div>
+      <h1 id="j-title"></h1>
+      <p id="j-meta" class="muted"></p>
+      <div id="j-form">
+        <label class="field" id="j-name-wrap"><span>Как вас назвать в чате? Можно имя или псевдоним</span>
+          <input id="j-name" type="text" maxlength="40" autocomplete="given-name" enterkeyhint="go"></label>
+        <button id="j-go" class="btn big block">Войти на урок</button>
+        <p class="muted center small" id="j-hint">Ничего устанавливать не нужно</p>
+      </div>
+      <div id="j-wait" class="j-wait hidden" role="status"><span class="spinner" aria-hidden="true"></span><span id="j-wait-text"></span></div>
+      <p id="j-error" class="j-error hidden" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- эфир -->
+  <section id="screen-room" class="room hidden">
+    <header class="r-top">
+      <div class="r-title"><b id="r-title"></b> <span id="r-group" class="r-group"></span></div>
+      <div class="r-top-right">
+        <span id="r-rec" class="r-rec hidden" role="status">● ЗАПИСЬ <span id="r-rec-time">00:00:00</span></span>
+        <span id="r-count" class="r-count"></span>
+        <span id="r-role" class="r-role"></span>
+        <button id="r-sound" class="top-btn" type="button">🔊 Не слышно?</button>
+        <button id="r-leave" class="top-btn" type="button">Выйти</button>
+      </div>
+    </header>
+    <div class="r-body">
+      <div class="stage" id="stage">
+        <div class="stage-label hidden" id="stage-label"></div>
+        <div class="stage-main" id="stage-main"></div>
+        <div class="pip hidden" id="pip"></div>
+        <div class="pres-ctl hidden" id="pres-ctl">
+          <button id="pres-prev" aria-label="Предыдущий слайд">◀</button>
+          <span id="pres-page" aria-live="polite">1 / 1</span>
+          <button id="pres-next" aria-label="Следующий слайд">▶</button>
+          <button id="pres-close" class="pres-x">Убрать слайды</button>
+        </div>
+        <button id="audio-unlock" class="audio-unlock hidden">🔊 Нажмите, чтобы включить звук</button>
+        <div id="precheck" class="precheck hidden" role="dialog" aria-labelledby="pc-title">
+          <div class="pc-card">
+            <h2 id="pc-title">Проверка перед эфиром</h2>
+            <p class="muted" id="pc-text">Ученики вас пока не видят. Проверьте камеру и звук, потом начните урок.</p>
+            <div class="pc-video" id="pc-video"><span class="muted">Камера выключена</span></div>
+            <div class="pc-meter" aria-hidden="true"><span id="pc-level"></span></div>
+            <p class="small muted" id="pc-mic-hint">Скажите что-нибудь — полоска должна двигаться.</p>
+            <div class="form-row">
+              <label class="field"><span>Камера</span><select id="pc-cam"></select></label>
+              <label class="field"><span>Микрофон</span><select id="pc-mic"></select></label>
+            </div>
+            <button id="pc-go" class="btn green big block">▶ Начать урок для учеников</button>
+            <p class="small muted center" id="pc-note">Запись начнётся сама.</p>
+          </div>
+        </div>
+      </div>
+      <aside class="side-panel" id="side-panel">
+        <div class="cam-tile hidden" id="cam-tile"></div>
+        <div class="panel-box">
+          <div class="tabs" role="tablist">
+            <button class="tab on" data-tab="chat" role="tab" aria-selected="true" id="tab-btn-chat">Чат</button>
+            <button class="tab" data-tab="people" role="tab" aria-selected="false" id="tab-btn-people">Участники</button>
+          </div>
+          <div class="tab-body" id="tab-chat" role="tabpanel">
+            <div class="hands hidden" id="hands">
+              <div class="hands-title">✋ Поднятые руки (<span id="hands-n">0</span>)</div>
+              <div id="hands-list"></div>
+            </div>
+            <div class="chat-title">💬 Чат <span id="chat-closed" class="chip red small hidden">закрыт</span><span id="chat-count" class="muted small chat-count"></span></div>
+            <div class="chat" id="chat" aria-live="polite"></div>
+            <form class="chat-form" id="chat-form">
+              <label class="sr-only" for="chat-input">Сообщение в чат</label>
+              <input id="chat-input" type="text" maxlength="1000" placeholder="Написать в чат…" autocomplete="off" enterkeyhint="send">
+              <button class="btn small" type="submit" aria-label="Отправить сообщение">➤</button>
+            </form>
+          </div>
+          <div class="tab-body hidden" id="tab-people" role="tabpanel"><div id="people"></div></div>
+        </div>
+      </aside>
+    </div>
+    <footer class="r-bar" id="r-bar"></footer>
+  </section>
+
+  <!-- конец -->
+  <section id="screen-end" class="join hidden">
+    <div class="join-card">
+      <h1 id="end-title">Урок завершён</h1>
+      <p id="end-text" class="muted">Спасибо! Запись появится в боте в разделе «🎬 Записи».</p>
+      <button id="end-resume" class="btn green block hidden">▶ Возобновить урок</button>
+      <button id="end-close" class="btn block hidden" style="margin-top:10px">Закрыть</button>
+    </div>
+  </section>
+
+  <input type="file" id="pdf-input" accept="application/pdf" class="hidden">
+  <div class="toast-wrap" id="toasts" aria-live="polite"></div>
+  <script type="module" src="static/build/lesson.js"></script>
+</body>
+</html>

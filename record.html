@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <title>Запись урока — демонстрация</title>
+  <link rel="stylesheet" href="static/base.css">
+  <style>
+    body { background: #fff; }
+    .wrap { max-width: 900px; margin: 0 auto; }
+    .player-box { background: #000; }
+    video { display: block; width: 100%; aspect-ratio: 16/9; background: #000; }
+    .info { padding: 24px 20px 40px; }
+    .info h1 { font-size: 26px; margin-bottom: 12px; }
+    .info p { margin: 6px 0; color: var(--muted); font-size: 17px; }
+    .dl { margin-top: 26px; background: var(--blue-soft); color: var(--blue); border: 0; width: 100%; min-height: 58px; border-radius: 14px; font-weight: 800; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-decoration: none; font-family: inherit; }
+    .dl:hover { text-decoration: none; background: #dcebfa; }
+    .note { text-align: center; color: var(--muted); margin-top: 12px; font-size: 14px; }
+    .resume { background: var(--amber-soft); color: #6b4e10; border-radius: 12px; padding: 10px 14px; margin-top: 14px; display: flex; gap: 10px; align-items: center; justify-content: space-between; }
+    .resume button { min-height: 44px; border: 0; background: none; color: var(--blue); font: inherit; font-weight: 700; cursor: pointer; }
+    .err { margin: 80px 20px; text-align: center; }
+    .err h1 { font-size: 24px; margin-bottom: 10px; }
+    .no-file { aspect-ratio: 16/9; display: grid; place-items: center; color: #aab4c4; padding: 20px; text-align: center; }
+  </style>
+  <link rel="stylesheet" href="static/demo/demo.css">
+  <script>window.KZ_DEMO = {"recId": 3};</script>
+  <script src="static/demo/demo_data.js"></script>
+  <script src="static/demo/demo.js"></script>
+</head>
+<body>
+  <div class="wrap" id="root"><div class="err"><span class="spinner" aria-label="Загрузка"></span></div></div>
+  <script type="module">
+    import { startTour } from "./static/tour.js";
+    const tg = window.Telegram && window.Telegram.WebApp;
+    const initData = tg && tg.initData ? tg.initData : "";
+    if (initData) { try { tg.ready(); tg.expand(); } catch (_) {} }
+    const t = new URLSearchParams(location.search).get("t") || "";
+    if (t) history.replaceState(null, "", location.pathname);
+    const id = window.KZ_DEMO && window.KZ_DEMO.recId ? window.KZ_DEMO.recId : location.pathname.split("/").filter(Boolean).pop();
+    const headers = {};
+    if (initData) headers["x-init-data"] = initData;
+    if (t) headers["x-link"] = t;
+    const root = document.getElementById("root");
+    const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const posKey = `rec_pos_${id}`;
+    const getPos = () => { try { return Number(localStorage.getItem(posKey)) || 0; } catch (_) { return 0; } };
+    const setPos = (v) => { try { localStorage.setItem(posKey, String(Math.floor(v))); } catch (_) {} };
+    const fmt = (s) => { s = Math.floor(s); const h = Math.floor(s / 3600), m = Math.floor(s / 60) % 60, x = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); };
+
+    async function load() {
+      const r = await fetch(`/api/rec/${id}`, { headers, credentials: "same-origin" });
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(d.detail || "Попробуйте открыть запись из бота ещё раз.");
+      return d;
+    }
+
+    let d;
+    try { d = await load(); }
+    catch (e) {
+      root.innerHTML = `<div class="err"><h1>Запись недоступна</h1><p class="muted">${esc(e.message)}</p></div>`;
+      throw e;
+    }
+    document.title = d.title;
+    const player = d.url
+      ? `<video id="v" controls playsinline preload="metadata" src="${esc(d.url)}"></video>`
+      : `<div class="no-file">Запись ещё готовится — загляните чуть позже.</div>`;
+    root.innerHTML = `
+      <div class="player-box">${player}</div>
+      <div class="info">
+        <h1>${esc(d.title)}</h1>
+        <p>${esc(d.date)} · ${esc(d.duration)}</p>
+        <p>Доступно до ${esc(d.available_until)}</p>
+        <div id="resume"></div>
+        ${d.download_url ? `<button class="dl" id="dl">⬇ Скачать запись</button>
+          <p class="note">Файл большой — лучше скачивать по Wi‑Fi.</p>` : ""}
+      </div>`;
+
+    const v = document.getElementById("v");
+    if (v) {
+      // продолжить с того места, где остановились
+      const pos = getPos();
+      if (pos > 30) {
+        const box = document.getElementById("resume");
+        box.innerHTML = `<div class="resume"><span>Вы остановились на ${fmt(pos)}</span><button id="go-on">Продолжить ▶</button></div>`;
+        document.getElementById("go-on").onclick = () => { v.currentTime = pos; v.play().catch(() => {}); box.innerHTML = ""; };
+      }
+      let last = 0;
+      v.addEventListener("timeupdate", () => { if (Math.abs(v.currentTime - last) > 5) { last = v.currentTime; setPos(v.currentTime); } });
+      v.addEventListener("ended", () => setPos(0));
+      // ссылка на файл живёт 30 минут: если истекла — берём новую и продолжаем с того же места
+      v.addEventListener("error", async () => {
+        const at = v.currentTime;
+        try { const nd = await load(); if (nd.url) { v.src = nd.url; v.currentTime = at; v.play().catch(() => {}); } } catch (_) {}
+      });
+    }
+
+    const dl = document.getElementById("dl");
+    if (dl) dl.onclick = async () => {
+      let url = d.download_url;
+      try { const nd = await load(); url = nd.download_url || url; } catch (_) {}
+      const name = `${d.title}.mp4`;
+      if (tg && initData && typeof tg.downloadFile === "function" && tg.isVersionAtLeast && tg.isVersionAtLeast("8.0")) {
+        try { tg.downloadFile({ url, file_name: name }); return; } catch (_) {}
+      }
+      if (tg && initData && typeof tg.openLink === "function") {
+        tg.openLink(url);  // откроется в браузере телефона: ⬆ → «Сохранить в Файлы»
+        return;
+      }
+      const a = document.createElement("a"); a.href = url; a.download = name; document.body.append(a); a.click(); a.remove();
+    };
+
+    startTour("record", [
+      v ? { el: "#v", title: "Смотрите запись", text: "Нажмите ▶. Перематывать можно пальцем по полоске. Место, где остановились, запомнится." } : null,
+      dl ? { el: "#dl", title: "Скачать на телефон", text: "Файл большой — лучше по Wi‑Fi. На iPhone он сохранится в «Файлы»." } : null,
+    ].filter(Boolean));
+  </script>
+</body>
+</html>
