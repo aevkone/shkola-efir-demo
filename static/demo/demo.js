@@ -78,6 +78,15 @@
         return ok({ items });
       }
       if ((m = pth.match(/^\/recordings\/(\d+)\/url$/))) return ok({ url: "static/demo/sample.mp4" });
+      if ((m = pth.match(/^\/recordings\/(\d+)\/subtitles$/))) return ok(P.subs[m[1]] || { status: "", cues: [] });
+      if ((m = pth.match(/^\/recordings\/(\d+)\/burn\/url$/))) return ok({ url: "static/demo/sample_subs.mp4" });
+    }
+    // субтитры: правка, повтор, ролик с вшитыми субтитрами
+    if ((m = pth.match(/^\/recordings\/(\d+)\/(subtitles|subtitles\/retry|burn)$/))) {
+      const item = P.recordings.items.find((x) => x.id === Number(m[1]));
+      if (m[2] === "subtitles" && method === "PUT") { P.subs[m[1]] = { ...(P.subs[m[1]] || {}), status: "ready", cues: body.cues }; if (item) item.burn_status = item.burn_status === "ready" ? "" : item.burn_status; return ok({ ok: true }); }
+      if (m[2] === "subtitles/retry" && item) { Object.assign(item, { subs_status: "queued", subs_label: "В очереди" }); return ok({ ok: true }); }
+      if (m[2] === "burn" && item) { item.burn_status = "queued"; return ok({ ok: true }); }
     }
     if (method === "POST" && pth === "/lessons") {
       if (!body.title) return fail("Напишите название урока");

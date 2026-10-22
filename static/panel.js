@@ -708,14 +708,57 @@ async function pageRecordings() {
     h("td", { class: "title" }, h("a", { href: `/panel/lessons/${r.lesson_id}`, style: "color:inherit" }, r.lesson),
       h("div", { class: "muted small sub" }, `до ${r.available_until} · скачивание ${r.download_allowed ? "можно" : "нельзя"}`)),
     h("td", {}, r.status === "ready" ? r.duration : h("span", { class: "chip " + (r.status === "failed" ? "red" : "amber") }, r.status_label)),
+    h("td", {}, r.status === "ready" ? subsCell(r) : null),
     h("td", { style: "white-space:nowrap" },
       r.status === "ready" ? h("button", { class: "btn small", onclick: () => playRec(r.id, r.lesson) }, "▶ Смотреть") : null, " ",
       isHost() && r.status !== "recording" ? h("button", { class: "icon-btn", title: "Удалить запись", "aria-label": `Удалить запись «${r.lesson}»`, onclick: () => confirmBox("Удалить запись?", "Файл удалится, ученики больше не смогут её посмотреть. Отменить нельзя.", "Удалить", async () => { await api(`/recordings/${r.id}`, { method: "DELETE" }); toast("Запись удалена"); pageRecordings(); }) }, "🗑") : null)));
   put($("#main"), h("div", { class: "page-head" }, h("h1", {}, "Записи")),
     h("p", { class: "muted", style: "margin:-14px 0 22px" }, "Записи появляются сами после урока и удаляются сами, когда заканчивается срок доступа."),
     h("div", { class: "table-card" }, rows.length ? h("table", { class: "t" },
-      h("thead", {}, h("tr", {}, ...["Дата", "Урок", "Длительность", ""].map((x) => h("th", { scope: "col" }, x)))),
+      h("thead", {}, h("tr", {}, ...["Дата", "Урок", "Длительность", "Субтитры", ""].map((x) => h("th", { scope: "col" }, x)))),
       h("tbody", {}, rows)) : h("div", { class: "empty" }, "Записей пока нет. Они появятся после первого урока.")));
+}
+
+// ---------- субтитры ----------
+const SUBS_CHIP = { ready: "green", failed: "red", queued: "amber", working: "amber" };
+function subsCell(r) {
+  if (!r.subs_status) return h("button", { class: "link-btn", onclick: async () => { await api(`/recordings/${r.id}/subtitles/retry`, { method: "POST" }); toast("Субтитры поставлены в очередь"); pageRecordings(); } }, "Сделать");
+  const chip = h("span", { class: "chip " + SUBS_CHIP[r.subs_status] }, r.subs_label);
+  return r.subs_status === "ready" || r.subs_status === "failed"
+    ? h("button", { class: "subs-btn", onclick: () => subsDialog(r), "aria-label": `Субтитры к записи «${r.lesson}»` }, chip, " ✏️")
+    : chip;
+}
+const fmtTime = (s) => { s = Math.max(0, s); const m = Math.floor(s / 60), x = Math.floor(s % 60); return `${m}:${String(x).padStart(2, "0")}`; };
+async function subsDialog(r) {
+  const d = await api(`/recordings/${r.id}/subtitles`);
+  if (d.status === "failed") {
+    return confirmBox("Субтитры не получились", (d.error || "Не удалось распознать речь.") + " Можно попробовать ещё раз.", "Распознать заново",
+      async () => { await api(`/recordings/${r.id}/subtitles/retry`, { method: "POST" }); toast("Субтитры поставлены в очередь"); pageRecordings(); }, { danger: false });
+  }
+  const inputs = d.cues.map((c) => { const ta = h("textarea", { rows: c.text.length > 52 ? 2 : 1, maxlength: 300, "aria-label": `Фраза на ${fmtTime(c.start)}` }); ta.value = c.text; return ta; });
+  const list = h("div", { class: "subs-list" }, ...d.cues.map((c, i) => h("label", { class: "subs-row" }, h("span", { class: "subs-time" }, fmtTime(c.start)), inputs[i])));
+  const burn = r.burn_status === "ready"
+    ? h("button", { class: "btn outline", onclick: async () => { const u = await api(`/recordings/${r.id}/burn/url`); if (DEMO) window.open(u.url, "_blank"); else location.href = u.url; } }, "⬇ Ролик с субтитрами")
+    : r.burn_status === "queued" || r.burn_status === "working"
+      ? h("span", { class: "chip amber" }, "Ролик с субтитрами готовится…")
+      : r.burn_allowed
+        ? h("button", { class: "btn outline", onclick: async (e) => { const done = busy(e.target, "Ставлю в очередь…"); try { await save(false); await api(`/recordings/${r.id}/burn`, { method: "POST" }); toast("Ролик с вшитыми субтитрами будет готов через несколько минут"); pageRecordings(); } finally { done(); } } }, "🎬 Вшить в ролик")
+        : null;
+  async function save(notify = true) {
+    await api(`/recordings/${r.id}/subtitles`, { method: "PUT", body: { cues: d.cues.map((c, i) => ({ start: c.start, end: c.end, text: inputs[i].value })) } });
+    if (notify) toast("Субтитры сохранены ✓");
+  }
+  modal(`Субтитры — ${r.lesson}`, h("div", {},
+    h("p", { class: "muted", style: "margin:-8px 0 14px" }, d.cues.length ? "Текст распознан автоматически. Исправьте ошибки прямо в строках — ученики увидят исправленный вариант." : "Речь в записи не найдена."),
+    list,
+    h("div", { class: "subs-tools" },
+      h("a", { class: "btn ghost", href: DEMO ? "#" : `/api/panel/recordings/${r.id}/subtitles.srt`, onclick: DEMO ? (e) => { e.preventDefault(); toast("В демонстрации файл не скачивается"); } : null }, "⬇ Файл субтитров (.srt)"),
+      burn),
+    r.burn_allowed ? h("p", { class: "muted small", style: "margin:10px 0 0" }, "«Вшить в ролик» — субтитры станут частью видео: удобно для коротких роликов в соцсети.") : null),
+  (c) => [
+    h("button", { class: "btn outline", onclick: c }, "Закрыть"),
+    h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await save(); c(); pageRecordings(); } finally { done(); } } }, "Сохранить правки"),
+  ]);
 }
 
 // ---------- цвет школы ----------
@@ -761,6 +804,7 @@ async function pageSettings() {
     style: hex.includes(",") ? `background:linear-gradient(135deg, ${hex.split(",")[0]} 55%, ${hex.split(",")[1]} 55%)` : `background:${hex}`, title: name, "aria-label": name, role: "radio", "aria-checked": hex === color ? "true" : "false",
     onclick: () => { color = hex; picker.value = hex; applyTheme(hex); paintSwatches(); } })), h("label", { class: "swatch custom", title: "Свой цвет" }, picker, h("span", { "aria-hidden": "true" }, "＋")));
   picker.addEventListener("input", () => { color = picker.value; applyTheme(color); paintSwatches(); });
+  const subsOn = h("input", { type: "checkbox", checked: me.subtitles !== false });
   let decor = me.decor || "";
   const decors = h("div", { class: "decor-pick", role: "radiogroup", "aria-label": "Узор школы" });
   const paintDecors = () => put(decors, ...DECORS.map(([key, name, ico]) => h("button", { type: "button", class: "decor-opt" + (key === decor ? " on" : ""),
@@ -775,9 +819,10 @@ async function pageSettings() {
     field("Куда ученикам писать вопросы", contact, "Появится кнопкой «✉️ Написать в школу», когда у ученика что-то не получается. Вопросы, написанные боту, и так приходят команде."),
     h("div", { class: "field" }, h("span", {}, "Цвет школы — панель, эфир и страница записи"), swatches,
       h("small", { class: "muted", style: "display:block;margin-top:6px" }, "Нажмите на цвет — увидите сразу. Сохранится после «Сохранить».")),
+    h("label", { class: "check-row" }, subsOn, h("span", {}, h("b", {}, "Субтитры к записям"), h("br"), h("small", { class: "muted" }, "После урока речь распознаётся сама, ученики видят текст под видео. Бесплатно, на вашем сервере."))),
     h("div", { class: "field" }, h("span", {}, "Узор по теме школы — меню, вход на урок, эфир"), decors,
       h("small", { class: "muted", style: "display:block;margin-top:6px" }, "Нужен свой узор под тему школы — напишите нам, нарисуем.")),
-    isHost() ? h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await api("/settings", { method: "PATCH", body: { school_name: school.value, host_name: hostName.value, contact: contact.value, theme_color: color, decor } }); if (DEMO) { try { localStorage.setItem("kz_demo_theme", color); localStorage.setItem("kz_demo_decor", decor); } catch (_) {} } toast("Сохранено ✓"); init(); } finally { done(); } } }, "Сохранить") : h("p", { class: "muted small" }, "Настройки школы меняет ведущая."));
+    isHost() ? h("button", { class: "btn", onclick: async (e) => { const done = busy(e.target); try { await api("/settings", { method: "PATCH", body: { school_name: school.value, host_name: hostName.value, contact: contact.value, theme_color: color, decor, subtitles: subsOn.checked } }); if (DEMO) { try { localStorage.setItem("kz_demo_theme", color); localStorage.setItem("kz_demo_decor", decor); } catch (_) {} } toast("Сохранено ✓"); init(); } finally { done(); } } }, "Сохранить") : h("p", { class: "muted small" }, "Настройки школы меняет ведущая."));
 
   const gname = h("input", { type: "text", placeholder: "Например: Курс 2026", maxlength: 120 });
   const groupsCard = h("div", { class: "card", id: "groups" }, h("h2", {}, "Группы"),

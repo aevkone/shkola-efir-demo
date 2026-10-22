@@ -189,3 +189,15 @@ html[data-decor] body.lesson-body .join {
 }
 html[data-decor] .room { background-image: var(--decor-tile); background-size: var(--decor-tile-size); }
 html[data-decor] .join-card { box-shadow: 0 24px 64px rgba(0, 0, 0, .35); }
+@media (max-width: 860px) {
+  .precheck { position: fixed; inset: 0; z-index: 60; align-items: flex-start; padding: 16px 12px 24px; }
+}
+html[data-decor] body.lesson-body .join {
+  background-color: var(--navy);
+  background-image: var(--decor-mark), var(--decor-tile), linear-gradient(165deg, var(--navy) 0%, color-mix(in srgb, var(--blue) 55%, var(--navy)) 100%);
+  background-repeat: no-repeat, repeat, no-repeat; background-size: 520px, var(--decor-tile-size), cover;
+}
+/* проверка перед эфиром не обрезается сверху на невысоких экранах */
+.precheck { align-items: safe center; }
+.pc-video { max-height: 32vh; margin-inline: auto; }
+.pc-card { max-height: 100%; }

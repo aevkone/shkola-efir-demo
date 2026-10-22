@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <title>Запись урока — демонстрация</title>
-  <link rel="stylesheet" href="static/base.css?v=1792675992">
+  <link rel="stylesheet" href="static/base.css?v=1792694167">
   <style>
     body { background: #fff; }
     .wrap { max-width: 900px; margin: 0 auto; }
@@ -20,12 +20,15 @@
     .resume button { min-height: 44px; border: 0; background: none; color: var(--blue); font: inherit; font-weight: 700; cursor: pointer; }
     .err { margin: 80px 20px; text-align: center; }
     .err h1 { font-size: 24px; margin-bottom: 10px; }
+    .cc { margin-top: 14px; min-height: 44px; padding: 0 16px; border-radius: 12px; border: 1px solid var(--line); background: #fff; color: var(--text); font: inherit; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .cc[aria-pressed="true"] { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+    video::cue { background: rgba(0, 0, 0, .72); color: #fff; font-size: 1.05em; line-height: 1.35; }
     .no-file { aspect-ratio: 16/9; display: grid; place-items: center; color: #aab4c4; padding: 20px; text-align: center; }
   </style>
-  <link rel="stylesheet" href="static/demo/demo.css?v=1792675992">
+  <link rel="stylesheet" href="static/demo/demo.css?v=1792694167">
   <script>window.KZ_DEMO = {"recId": 3};</script>
-  <script src="static/demo/demo_data.js?v=1792675992"></script>
-  <script src="static/demo/demo.js?v=1792675992"></script>
+  <script src="static/demo/demo_data.js?v=1792694167"></script>
+  <script src="static/demo/demo.js?v=1792694167"></script>
 </head>
 <body>
   <div class="wrap" id="root"><div class="err"><span class="spinner" aria-label="Загрузка"></span></div></div>
@@ -70,12 +73,31 @@
         <h1>${esc(d.title)}</h1>
         <p>${esc(d.date)} · ${esc(d.duration)}</p>
         <p>Доступно до ${esc(d.available_until)}</p>
+        ${d.subtitles && d.url ? `<button class="cc" id="cc" type="button" aria-pressed="true">💬 Субтитры: включены</button>` : ""}
         <div id="resume"></div>
         ${d.download_url ? `<button class="dl" id="dl">⬇ Скачать запись</button>
           <p class="note">Файл большой — лучше скачивать по Wi‑Fi.</p>` : ""}
       </div>`;
 
     const v = document.getElementById("v");
+    const cc = document.getElementById("cc");
+    if (v && cc) {
+      // субтитры приходят текстом вместе с записью; дорожка — из него, без отдельной ссылки
+      const track = document.createElement("track");
+      Object.assign(track, { kind: "subtitles", srclang: "ru", label: "Русский", default: true,
+        src: URL.createObjectURL(new Blob([d.subtitles], { type: "text/vtt" })) });
+      v.append(track);
+      let on = true;
+      try { on = localStorage.getItem("rec_cc") !== "off"; } catch (_) {}
+      const paint = () => {
+        if (v.textTracks[0]) v.textTracks[0].mode = on ? "showing" : "hidden";
+        cc.setAttribute("aria-pressed", String(on));
+        cc.textContent = on ? "💬 Субтитры: включены" : "💬 Субтитры: выключены";
+      };
+      track.addEventListener("load", paint);
+      cc.onclick = () => { on = !on; try { localStorage.setItem("rec_cc", on ? "on" : "off"); } catch (_) {} paint(); };
+      paint();
+    }
     if (v) {
       // продолжить с того места, где остановились
       const pos = getPos();
@@ -111,6 +133,7 @@
 
     startTour("record", [
       v ? { el: "#v", title: "Смотрите запись", text: "Нажмите ▶. Перематывать можно пальцем по полоске. Место, где остановились, запомнится." } : null,
+      cc ? { el: "#cc", title: "Субтитры", text: "Текст того, что говорят на уроке. Мешает — выключите этой кнопкой." } : null,
       dl ? { el: "#dl", title: "Скачать на телефон", text: "Файл большой — лучше по Wi‑Fi. На iPhone он сохранится в «Файлы»." } : null,
     ].filter(Boolean));
   </script>

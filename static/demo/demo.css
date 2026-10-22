@@ -3,3 +3,6 @@
 .room .demo-bar, body.lesson-body .demo-bar { position: relative; }
 /* в эфире плашка демо занимает место — эфир под неё */
 body.lesson-body .room { height: calc(100dvh - 38px); }
+/* полоса демо сверху: меню панели под неё, «Выйти» остаётся на экране */
+@media (min-width: 821px) { body:has(.demo-bar) .side { top: 38px; height: calc(100vh - 38px); } }
+@media (max-width: 860px) { body:has(.demo-bar) .precheck { top: 38px; } }

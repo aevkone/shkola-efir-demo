@@ -11,7 +11,7 @@
     html, body { height: 100%; }
     body { display: flex; flex-direction: column; background: #dfe7ef; font-size: 16px; }
     .tg-head { display: flex; align-items: center; gap: 12px; background: #fff; padding: 10px 14px; border-bottom: 1px solid #e3e8ef; flex: none; }
-    .tg-ava { width: 42px; height: 42px; border-radius: 50%; background: #2e6db4; color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 20px; }
+    .tg-ava { width: 42px; height: 42px; border-radius: 50%; background: var(--blue, #2e6db4); color: #fff; display: grid; place-items: center; font-weight: 800; font-size: 20px; }
     .tg-head b { display: block; }
     .tg-head span { color: var(--muted); font-size: 13px; }
     .chat { flex: 1; overflow-y: auto; padding: 14px 10px; display: flex; flex-direction: column; gap: 8px; }
@@ -48,6 +48,9 @@
     import { startTour } from "./static/tour.js";
     const B = (window.KZ_DEMO_DATA || {}).bot || {};
     document.getElementById("title").textContent = B.school || "Школа";
+    // аватар бота — в цвет школы
+    const theme = ((((window.KZ_DEMO_DATA || {}).panel || {}).me || {}).theme_color || "").split(",")[0];
+    if (/^#[0-9a-f]{6}$/i.test(theme)) document.documentElement.style.setProperty("--blue", theme);
     const chat = document.getElementById("chat");
     const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; };
     const scroll = () => { chat.scrollTop = chat.scrollHeight; };
