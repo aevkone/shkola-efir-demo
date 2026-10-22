@@ -5,6 +5,8 @@
   --blue: #2e6db4;
   --blue-2: #245a96;
   --blue-soft: #eaf2fb;
+  --gold: var(--blue);
+  --gold-soft: var(--blue-soft);
   --green: #22a04b;
   --green-2: #1b8a3f;
   --green-soft: #e6f6ec;
@@ -142,3 +144,30 @@ input:focus, select:focus, textarea:focus { border-color: var(--blue); box-shado
 .field-error { color: #b42323; font-size: 14px; margin-top: 6px; }
 input.invalid, select.invalid, textarea.invalid { border-color: #c42d2d; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- шлифовка: переносы, цифры, нажатия, фокус, появление ---------- */
+h1, h2, h3, .modal h2 { text-wrap: balance; }
+p, small, .hint-box, li { text-wrap: pretty; }
+table, .t td, .t th, [id$="-time"], .r-count, .chip { font-variant-numeric: tabular-nums; }
+.btn {
+  transition-property: background-color, border-color, color, box-shadow, transform;
+  transition-duration: .15s; transition-timing-function: ease-out;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .08);
+}
+.btn:hover { box-shadow: 0 4px 12px color-mix(in srgb, var(--blue) 28%, transparent); }
+.btn.ghost, .btn.ghost:hover, .btn.outline { box-shadow: none; }
+.btn:active:not(:disabled) { transform: scale(.97); }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--blue) 45%, transparent); outline-offset: 2px;
+}
+.card { border: 1px solid var(--line); box-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 8px 24px rgba(16, 24, 40, .05); }
+img { outline: 1px solid rgba(0, 0, 0, .08); outline-offset: -1px; }
+.modal-back { animation: kz-fade .18s ease-out; }
+.modal { animation: kz-rise .22s cubic-bezier(.2, .8, .2, 1); box-shadow: 0 24px 64px rgba(16, 24, 40, .24); }
+.toast { animation: kz-rise .2s ease-out; }
+@keyframes kz-fade { from { opacity: 0; } }
+@keyframes kz-rise { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) {
+  .modal-back, .modal, .toast { animation: none; }
+  .btn:active:not(:disabled) { transform: none; }
+}

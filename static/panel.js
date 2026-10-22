@@ -719,16 +719,22 @@ async function pageRecordings() {
 }
 
 // ---------- цвет школы ----------
-const THEMES = [["#2e6db4", "Синий"], ["#1f8a5b", "Зелёный"], ["#6b4fbb", "Фиолетовый"], ["#a33a54", "Бордовый"],
-  ["#138496", "Бирюзовый"], ["#c8641c", "Оранжевый"], ["#b5487f", "Розовый"], ["#3d4a5c", "Графит"]];
+// Цвет — основной или «основной,акцент»: акцент красит звёздочку, отметки и номера шагов.
+const THEMES = [["#8a6cc0,#c9a24a", "Нежный фиолетовый с золотом"], ["#2e6db4", "Синий"], ["#1f8a5b", "Зелёный"], ["#6b4fbb", "Фиолетовый"],
+  ["#a33a54", "Бордовый"], ["#138496", "Бирюзовый"], ["#c8641c", "Оранжевый"], ["#b5487f", "Розовый"], ["#3d4a5c", "Графит"]];
 function mixColor(hex, to, k) {
   const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
   return "#" + c.map((x, i) => Math.round(x + (to[i] - x) * k).toString(16).padStart(2, "0")).join("");
 }
-export function applyTheme(color) {
+export function applyTheme(value) {
   const r = document.documentElement.style;
-  if (!/^#[0-9a-f]{6}$/i.test(color || "")) return;
+  if (!/^#[0-9a-f]{6}(,#[0-9a-f]{6})?$/i.test(value || "")) return;
+  const [color, accent] = value.split(",");
   r.setProperty("--blue", color);
+  r.setProperty("--bg", mixColor(color, [255, 255, 255], 0.95));
+  r.setProperty("--line", mixColor(color, [255, 255, 255], 0.86));
+  if (accent) { r.setProperty("--gold", accent); r.setProperty("--gold-soft", mixColor(accent, [255, 255, 255], 0.82)); }
+  else { r.removeProperty("--gold"); r.removeProperty("--gold-soft"); }
   r.setProperty("--blue-2", mixColor(color, [0, 0, 0], 0.18));
   r.setProperty("--blue-soft", mixColor(color, [255, 255, 255], 0.88));
   r.setProperty("--navy", mixColor(color, [10, 16, 30], 0.55));
@@ -746,9 +752,10 @@ async function pageSettings() {
   const picker = h("input", { type: "color", value: color, "aria-label": "Свой цвет", class: "color-pick" });
   const swatches = h("div", { class: "swatches", role: "radiogroup", "aria-label": "Цвет школы" });
   const paintSwatches = () => put(swatches, ...THEMES.map(([hex, name]) => h("button", { type: "button", class: "swatch" + (hex === color ? " on" : ""),
-    style: `background:${hex}`, title: name, "aria-label": name, role: "radio", "aria-checked": hex === color ? "true" : "false",
+    style: hex.includes(",") ? `background:linear-gradient(135deg, ${hex.split(",")[0]} 55%, ${hex.split(",")[1]} 55%)` : `background:${hex}`, title: name, "aria-label": name, role: "radio", "aria-checked": hex === color ? "true" : "false",
     onclick: () => { color = hex; picker.value = hex; applyTheme(hex); paintSwatches(); } })), h("label", { class: "swatch custom", title: "Свой цвет" }, picker, h("span", { "aria-hidden": "true" }, "＋")));
   picker.addEventListener("input", () => { color = picker.value; applyTheme(color); paintSwatches(); });
+  if (color.includes(",")) picker.value = color.split(",")[0];
   paintSwatches();
   const schoolCard = h("div", { class: "card", id: "school" }, h("h2", {}, "Школа"),
     field("Название (видно в боте и эфире)", school),

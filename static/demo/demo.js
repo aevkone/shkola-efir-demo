@@ -11,13 +11,16 @@
 
   // цвет школы, выбранный в демо-настройках, — на всех демо-экранах
   const mix = (hex, to, k) => "#" + [1, 3, 5].map((i, j) => Math.round(parseInt(hex.slice(i, i + 2), 16) + (to[j] - parseInt(hex.slice(i, i + 2), 16)) * k).toString(16).padStart(2, "0")).join("");
-  let savedTheme = "";
-  try { savedTheme = localStorage.getItem("kz_demo_theme") || ""; } catch (_) { /* приватный режим */ }
-  if (/^#[0-9a-f]{6}$/i.test(savedTheme)) {
+  let savedTheme = (P.me && P.me.theme_color) || "";
+  try { savedTheme = localStorage.getItem("kz_demo_theme") || savedTheme; } catch (_) { /* приватный режим */ }
+  if (/^#[0-9a-f]{6}(,#[0-9a-f]{6})?$/i.test(savedTheme)) {
     const r = document.documentElement.style;
-    r.setProperty("--blue", savedTheme); r.setProperty("--blue-2", mix(savedTheme, [0, 0, 0], 0.18));
-    r.setProperty("--blue-soft", mix(savedTheme, [255, 255, 255], 0.88));
-    r.setProperty("--navy", mix(savedTheme, [10, 16, 30], 0.55)); r.setProperty("--navy-2", mix(savedTheme, [10, 16, 30], 0.45));
+    const [c, accent] = savedTheme.split(",");
+    r.setProperty("--blue", c); r.setProperty("--blue-2", mix(c, [0, 0, 0], 0.18));
+    r.setProperty("--blue-soft", mix(c, [255, 255, 255], 0.88));
+    r.setProperty("--navy", mix(c, [10, 16, 30], 0.55)); r.setProperty("--navy-2", mix(c, [10, 16, 30], 0.45));
+    r.setProperty("--bg", mix(c, [255, 255, 255], 0.95)); r.setProperty("--line", mix(c, [255, 255, 255], 0.86));
+    if (accent) { r.setProperty("--gold", accent); r.setProperty("--gold-soft", mix(accent, [255, 255, 255], 0.82)); }
     if (P.me) P.me.theme_color = savedTheme;
   }
   const nid = () => ++seq;

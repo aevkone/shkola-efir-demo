@@ -3,7 +3,7 @@
 
 const css = `
 .tour-shade{position:fixed;inset:0;z-index:2000;pointer-events:auto}
-.tour-hole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,16,30,.62);transition:all .25s ease;pointer-events:none;z-index:2001}
+.tour-hole{position:fixed;border-radius:14px;box-shadow:0 0 0 9999px rgba(10,16,30,.62);transition:top .25s ease,left .25s ease,width .25s ease,height .25s ease;pointer-events:none;z-index:2001}
 .tour-hole.none{box-shadow:0 0 0 9999px rgba(10,16,30,.62);width:0;height:0;left:50%;top:40%}
 .tour-card{position:fixed;z-index:2002;background:#fff;color:#16202e;border-radius:18px;padding:22px 22px 18px;width:min(360px,calc(100vw - 32px));box-shadow:0 12px 40px rgba(0,0,0,.3);font:17px/1.45 -apple-system,"Segoe UI",Roboto,Arial,sans-serif}
 .tour-card h3{margin:0 0 8px;font-size:20px;line-height:1.25}
@@ -12,9 +12,9 @@ const css = `
 .tour-row{display:flex;gap:10px;align-items:center;justify-content:space-between}
 .tour-row .tour-skip{background:none;border:0;color:#64707f;font:inherit;font-size:15px;cursor:pointer;min-height:44px;padding:0 6px}
 .tour-row .tour-btns{display:flex;gap:8px}
-.tour-btn{min-height:48px;padding:0 20px;border-radius:12px;border:2px solid #2e6db4;background:#2e6db4;color:#fff;font:inherit;font-weight:700;cursor:pointer}
-.tour-btn.back{background:#fff;color:#2e6db4}
-.tour-help{position:fixed;right:16px;bottom:16px;z-index:900;width:52px;height:52px;border-radius:50%;border:0;background:#2e6db4;color:#fff;font:700 24px/1 -apple-system,"Segoe UI",Arial,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer}
+.tour-btn{min-height:48px;padding:0 20px;border-radius:12px;border:2px solid var(--blue,#2e6db4);background:var(--blue,#2e6db4);color:#fff;font:inherit;font-weight:700;cursor:pointer}
+.tour-btn.back{background:#fff;color:var(--blue,#2e6db4)}
+.tour-help{position:fixed;right:16px;bottom:16px;z-index:900;width:52px;height:52px;border-radius:50%;border:0;background:var(--blue,#2e6db4);color:#fff;font:700 24px/1 -apple-system,"Segoe UI",Arial,sans-serif;box-shadow:0 4px 16px rgba(0,0,0,.25);cursor:pointer}
 `;
 
 let styled = false;
