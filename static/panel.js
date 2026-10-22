@@ -150,6 +150,8 @@ $("#logout").addEventListener("click", async () => {
 });
 
 async function route() {
+  // окно, открытое на прошлой странице (ушли кнопкой «Назад»), закрывается вместе с ней
+  document.querySelectorAll(".modal-back").forEach((m) => m.remove());
   const p = curPath().replace(/\/+$/, "");
   const m = p.match(/^\/panel\/lessons\/(\d+)$/);
   let page = "lessons";
